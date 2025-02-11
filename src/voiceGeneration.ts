@@ -31,14 +31,19 @@ export async function voiceGeneration(text: string, voiceId: string): Promise<st
     );
 
     const audioBuffer = Buffer.from(response.data, 'binary');
-    const outputFilePath = path.join(__dirname, 'output', 'output.mp3');
+    const outputDir = path.join(__dirname, '../output/audio');
+    const outputFilePath = path.join(outputDir, 'output.mp3');
 
-    fs.mkdirSync(path.dirname(outputFilePath), { recursive: true });
+    // Ensure the output directory exists
+    fs.mkdirSync(outputDir, { recursive: true });
+
+    // Save the audio file
     fs.writeFileSync(outputFilePath, audioBuffer);
 
+    console.log(`✅ Audio file saved at: ${outputFilePath}`);
     return outputFilePath;
   } catch (error) {
-    console.error('Error generating voice:', error);
+    console.error('❌ Error generating voice:', error);
     throw error;
   }
 }

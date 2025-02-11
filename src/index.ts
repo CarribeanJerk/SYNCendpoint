@@ -1,7 +1,7 @@
 import { voiceGeneration } from './voiceGeneration';
 
 async function main() {
-  const text = 'You know noah solomon has always been a fine fellow';
+  const text = 'This faggot noah solomon man, god the jeets hate this guys guts';
   const voiceId = 'K1zEUenwO6XnzLVQdgEp'; // Replace with the desired voice ID
 
   try {
