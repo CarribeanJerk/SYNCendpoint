@@ -1,4 +1,5 @@
 import { voiceGeneration } from './voiceGeneration';
+import { videoGeneration } from './videoGeneration';
 
 async function main() {
   const text = 'This faggot noah solomon man, god the jeets hate this guys guts';
@@ -7,6 +8,8 @@ async function main() {
   try {
     const audioFilePath = await voiceGeneration(text, voiceId);
     console.log(`Audio file saved at: ${audioFilePath}`);
+    const videoFilePath = await videoGeneration(audioFilePath);
+    console.log(`🎬 Final video generated: ${videoFilePath}`);
   } catch (error) {
     console.error('An error occurred:', error);
   }
