@@ -89,7 +89,7 @@ export async function submitSyncJob() {
     console.log(`🛠️ Submitting sync job to Sync API...`);
     
     const requestBody = {
-        model: 'lipsync-1.7.1',
+        model: 'lipsync-1.8.0',
         input: [
             {
                 type: 'video',
