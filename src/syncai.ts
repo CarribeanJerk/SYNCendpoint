@@ -142,7 +142,7 @@ export async function submitSyncJob() {
 export async function pollJobStatus(jobId: string) {
     const JOB_STATUS_URL = `https://api.sync.so/v2/generate/${jobId}`;
 
-    let retries = 120;  // Increased from 10 to 60 (5 minutes total)
+    let retries = 300;  // Increased from 10 to 60 (5 minutes total)
     while (retries > 0) {
         try {
             const response = await fetch(JOB_STATUS_URL, {
@@ -194,7 +194,7 @@ export async function pollJobStatus(jobId: string) {
         }
 
         retries--;
-        await new Promise((resolve) => setTimeout(resolve, 5000));  // Still checking every 5 seconds
+        await new Promise((resolve) => setTimeout(resolve, 10000));  // Still checking every 5 seconds
     }
 
     throw new Error('❌ Sync job did not complete within 5 minutes. You can check the status manually at https://sync.so/dashboard');

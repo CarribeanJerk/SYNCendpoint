@@ -19,6 +19,7 @@ export async function voiceGeneration(text: string, voiceId: string): Promise<st
         voice_settings: {
           stability: 0.4,
           similarity_boost: 0.75,
+          style: .2
         },
       },
       {

@@ -1,15 +1,33 @@
 import { voiceGeneration } from './voiceGeneration';
 import { videoGeneration } from './videoGeneration';
 import { submitSyncJob, pollJobStatus } from './syncai';  // Importing Sync API functions
+import fs from 'fs';
+import path from 'path';
+
+// Function to clear specified output folders
+function clearOutputFolders() {
+  const outputFolders = [
+    path.join(__dirname, 'output/final'),
+    path.join(__dirname, 'output/audio'),
+    path.join(__dirname, 'output/video')
+  ];
+
+  outputFolders.forEach(folder => {
+    if (fs.existsSync(folder)) {
+      fs.readdirSync(folder).forEach(file => {
+        const filePath = path.join(folder, file);
+        fs.unlinkSync(filePath); // Remove file
+      });
+    }
+  });
+}
+
+// Call the clearOutputFolders function before the main function
+clearOutputFolders();
 
 async function main() {
-  const text = `Well so you know, Brainrot jay ess, you fuckers really thought that was dead didn't ya?
-  And it's like i don't blame you right? Noah solomon had totally abandoned the project to work on
-  saving the world or whatever, you know. And that's all great but, the divine hand of providence had
-  another plan. And so brainrot is coming back bitches. This isn't just a shitpost, no no. This is an expression
-  of what is to come, so prepare your damnn bollocks and keep notifications on, for gods sake man.`;
-  
-  const voiceId = 'K1zEUenwO6XnzLVQdgEp'; // Replace with the desired voice ID
+  const text = `well so, I'm not really sure about this Noah solomon fellow...`; // your text
+  const voiceId = 'K1zEUenwO6XnzLVQdgEp';
 
   try {
     // Generate the voice (audio)
@@ -18,9 +36,9 @@ async function main() {
     
     // Generate the video based on the audio
     const videoFilePath = await videoGeneration(audioFilePath);
-    console.log(`🎬 Final video generated: ${videoFilePath}`);
+    console.log(`🎬 Video generated: ${videoFilePath}`);
 
-    // Now, submit the sync job to Sync API
+    // Submit sync job only once here, not in videoGeneration
     const jobId = await submitSyncJob();
     const finalVideoPath = await pollJobStatus(jobId);
     console.log(`🎬 Final synced video saved at: ${finalVideoPath}`);
