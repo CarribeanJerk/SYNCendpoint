@@ -5,8 +5,7 @@ import ffmpeg from 'fluent-ffmpeg';
 // Define clip folders
 const FOLDERS = [
   path.join(__dirname, '../public/JP/angle_1'),
-  path.join(__dirname, '../public/JP/angle_2'),
-  path.join(__dirname, '../public/JP/angle_3')
+  path.join(__dirname, '../public/JP/angle_2')
 ];
 
 const OUTPUT_DIR = path.join(__dirname, '../output/video');
@@ -58,9 +57,9 @@ export async function videoGeneration(audioFilePath: string): Promise<string> {
       let totalDuration = 0;
       let index = 0;
 
-      // Keep selecting random clips in sequence (1 → 2 → 3 → repeat) until the total length matches audio
+      // Keep selecting random clips in sequence (1 → 2 → repeat) until the total length matches audio
       while (totalDuration < audioDuration) {
-        const folder = FOLDERS[index % FOLDERS.length];
+        const folder = FOLDERS[index % FOLDERS.length]; // Cycle between 2 folders
         const videoPath = getRandomVideo(folder);
 
         if (!videoPath) {
