@@ -3,13 +3,11 @@ import { videoGeneration } from './videoGeneration';
 import { submitSyncJob, pollJobStatus } from './syncai';  // Importing Sync API functions
 
 async function main() {
-  const text = `This faggot noah solomon man, god the jeets hate this guys guts, 
-  and i really cant fucking stand this fellow either as a matter of fact, so its not as
-  if this is just some jeetian archetypical trait you know its like... and fuck the
-  jeets man who gives a fuck ya know? it's like god these fucking jeet faggots man.
-  and that's the worst part about being in my position is that, you have to deal with jeet
-  rice niggers who fuck with your shit, but anyways im rambling, we were talking about
-  noah solomon`;
+  const text = `Well so you know, Brainrot jay ess, you fuckers really thought that was dead didn't ya?
+  And it's like i don't blame you right? Noah solomon had totally abandoned the project to work on
+  saving the world or whatever, you know. And that's all great but, the divine hand of providence had
+  another plan. And so brainrot is coming back bitches. This isn't just a shitpost, no no. This is an expression
+  of what is to come, so prepare your damnn bollocks and keep notifications on, for gods sake man.`;
   
   const voiceId = 'K1zEUenwO6XnzLVQdgEp'; // Replace with the desired voice ID
 

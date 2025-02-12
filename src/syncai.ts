@@ -1,6 +1,5 @@
 import fs from 'fs';
 import fetch from 'node-fetch'; // Importing fetch for Node.js
-import FormData from 'form-data';
 import dotenv from 'dotenv';
 import AWS from 'aws-sdk';
 
@@ -143,7 +142,7 @@ export async function submitSyncJob() {
 export async function pollJobStatus(jobId: string) {
     const JOB_STATUS_URL = `https://api.sync.so/v2/generate/${jobId}`;
 
-    let retries = 60;  // Increased from 10 to 60 (5 minutes total)
+    let retries = 120;  // Increased from 10 to 60 (5 minutes total)
     while (retries > 0) {
         try {
             const response = await fetch(JOB_STATUS_URL, {
