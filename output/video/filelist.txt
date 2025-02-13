@@ -1,2 +1,0 @@
-file '/home/joshs/SYNCai/public/JP/env1/angle1/_1.mp4'
-file '/home/joshs/SYNCai/public/JP/env3/angle2/_1.mp4'

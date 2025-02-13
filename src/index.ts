@@ -7,9 +7,9 @@ import path from 'path';
 // Function to clear specified output folders
 function clearOutputFolders() {
   const outputFolders = [
-    path.join(__dirname, 'output/final'),
-    path.join(__dirname, 'output/audio'),
-    path.join(__dirname, 'output/video')
+    path.join(__dirname, '../output/final'),
+    path.join(__dirname, '../output/audio'),
+    path.join(__dirname, '../output/video')
   ];
 
   outputFolders.forEach(folder => {
@@ -26,10 +26,12 @@ function clearOutputFolders() {
 clearOutputFolders();
 
 async function main() {
-  const text = `well so, I'm not really sure about this Noah solomon fellow...`; // your text
-  const voiceId = 'K1zEUenwO6XnzLVQdgEp';
-
   try {
+    const text = `well so, I'm not really sure about this Noah solomon fellow... I mean you never know man...
+    he could just fuckin rug pull our dumb asses again like he did with the pillzoomie projec, and you know...
+    it's like that's not ideal in the slightest, but whatever man we'll see what happens `; // your text
+    const voiceId = 'K1zEUenwO6XnzLVQdgEp';
+
     // Generate the voice (audio)
     const audioFilePath = await voiceGeneration(text, voiceId);
     console.log(`Audio file saved at: ${audioFilePath}`);
@@ -38,7 +40,7 @@ async function main() {
     const videoFilePath = await videoGeneration(audioFilePath);
     console.log(`🎬 Video generated: ${videoFilePath}`);
 
-    // Submit sync job only once here, not in videoGeneration
+    // Submit sync job only once here
     const jobId = await submitSyncJob();
     const finalVideoPath = await pollJobStatus(jobId);
     console.log(`🎬 Final synced video saved at: ${finalVideoPath}`);
@@ -48,4 +50,5 @@ async function main() {
   }
 }
 
+// Only run main() once
 main();
