@@ -25,7 +25,7 @@ function clearOutputFolders() {
 // Call the clearOutputFolders function before the main function
 clearOutputFolders();
 
-async function main() {
+export async function generateVideo(text: string) {
   const outputDir = path.join(__dirname, '../output');
   
   // Randomly select an env folder
@@ -34,7 +34,6 @@ async function main() {
   const envFolder = path.join(__dirname, `../public/JP/${selectedEnv}`);
   
   try {
-    const text = `Example`; // your text
     const voiceId = 'K1zEUenwO6XnzLVQdgEp';
 
     // Generate the voice (audio)
@@ -50,10 +49,12 @@ async function main() {
     const finalVideoPath = await pollJobStatus(jobId, outputDir);
     console.log(`🎬 Final synced video saved at: ${finalVideoPath}`);
 
+    return finalVideoPath;
   } catch (error) {
     console.error('An error occurred:', error);
+    throw error;
   }
 }
 
 // Only run main() once
-main();
+generateVideo('Example');
