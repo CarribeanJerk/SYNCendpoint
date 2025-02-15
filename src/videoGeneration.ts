@@ -2,19 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import ffmpeg from 'fluent-ffmpeg';
 
-// Define clip folders
-const ENV_FOLDERS = ['env1', 'env2', 'env3', 'env4']; // Add your environment folders here
-const FOLDERS = ENV_FOLDERS.flatMap(env => [
-  path.join(__dirname, `../public/JP/${env}/angle1`),
-  path.join(__dirname, `../public/JP/${env}/angle2`)
-]);
-
-const OUTPUT_DIR = path.join(__dirname, '../output/video');
-const OUTPUT_VIDEO_PATH = path.join(OUTPUT_DIR, 'final.mp4');
-
-// Ensure output directory exists
-fs.mkdirSync(OUTPUT_DIR, { recursive: true });
-
 // Track used videos to prevent reuse
 let usedVideos = new Set<string>();
 let currentAngle = 1; // Track current angle (1 or 2)
@@ -37,47 +24,46 @@ function getVideoDuration(filePath: string): Promise<number> {
 }
 
 /**
- * Selects a random video from the given folder, alternating angles and preventing reuse.
- */
-function getRandomVideo(): string | null {
-  // Reset usedVideos if we've used all videos
-  if (usedVideos.size >= ENV_FOLDERS.length * 2 * 10) { // assuming max 10 videos per angle folder
-    usedVideos.clear();
-  }
-
-  // Randomly select an environment folder
-  const envFolder = ENV_FOLDERS[Math.floor(Math.random() * ENV_FOLDERS.length)];
-  const folder = path.join(__dirname, `../public/JP/${envFolder}`);
-
-  // Alternate between angle1 and angle2
-  const angleFolder = path.join(folder, `angle${currentAngle}`);
-  currentAngle = currentAngle === 1 ? 2 : 1; // Switch angle for next time
-  
-  // Get all available videos in this folder that haven't been used
-  const files = fs.readdirSync(angleFolder)
-    .filter(file => file.endsWith('.mp4'))
-    .map(file => path.join(angleFolder, file))
-    .filter(filePath => !usedVideos.has(filePath));
-
-  if (files.length === 0) {
-    console.warn(`⚠️ No unused videos found in ${angleFolder}, skipping.`);
-    return null;
-  }
-
-  // Select a random unused video
-  const selectedVideo = files[Math.floor(Math.random() * files.length)];
-  usedVideos.add(selectedVideo);
-  return selectedVideo;
-}
-
-/**
  * Generates a video matching the length of the audio.
  */
-export async function videoGeneration(audioFilePath: string): Promise<string> {
+export async function videoGeneration(audioFilePath: string, envFolder: string): Promise<string> {
   // Reset tracking variables
   usedVideos.clear();
   currentAngle = 1;
+
+  // Create angle folders for the specific environment
+  const ANGLE_FOLDERS = [
+    path.join(envFolder, 'angle1'),
+    path.join(envFolder, 'angle2')
+  ];
   
+  function getRandomVideo(): string | null {
+    // Reset usedVideos if we've used all videos
+    if (usedVideos.size >= 20) { // assuming max 10 videos per angle folder
+      usedVideos.clear();
+    }
+
+    // Use currentAngle to get the correct angle folder
+    const angleFolder = ANGLE_FOLDERS[currentAngle - 1];
+    currentAngle = currentAngle === 1 ? 2 : 1; // Switch angle for next time
+    
+    // Get all available videos in this folder that haven't been used
+    const files = fs.readdirSync(angleFolder)
+      .filter(file => file.endsWith('.mp4'))
+      .map(file => path.join(angleFolder, file))
+      .filter(filePath => !usedVideos.has(filePath));
+
+    if (files.length === 0) {
+      console.warn(`⚠️ No unused videos found in ${angleFolder}, skipping.`);
+      return null;
+    }
+
+    // Select a random unused video
+    const selectedVideo = files[Math.floor(Math.random() * files.length)];
+    usedVideos.add(selectedVideo);
+    return selectedVideo;
+  }
+
   return new Promise(async (resolve, reject) => {
     // Get audio duration
     ffmpeg.ffprobe(audioFilePath, async (err, metadata) => {
@@ -94,11 +80,10 @@ export async function videoGeneration(audioFilePath: string): Promise<string> {
 
       // Keep selecting random clips in sequence (1 → 2 → repeat) until the total length matches audio
       while (totalDuration < audioDuration) {
-        const folder = FOLDERS[index % FOLDERS.length]; // Cycle between 2 folders
         const videoPath = getRandomVideo();
 
         if (!videoPath) {
-          console.warn(`⚠️ No videos found in ${folder}, skipping.`);
+          console.warn(`⚠️ No videos found in ${ANGLE_FOLDERS[index % ANGLE_FOLDERS.length]}, skipping.`);
           index++;
           continue;
         }
@@ -119,7 +104,7 @@ export async function videoGeneration(audioFilePath: string): Promise<string> {
       }
 
       // Generate FFmpeg concat file
-      const concatFilePath = path.join(OUTPUT_DIR, 'filelist.txt');
+      const concatFilePath = path.join(__dirname, '../output/video/filelist.txt');
       let concatFileContent = selectedVideos.map(v => `file '${v}'`).join('\n');
       fs.writeFileSync(concatFilePath, concatFileContent);
 
@@ -128,10 +113,10 @@ export async function videoGeneration(audioFilePath: string): Promise<string> {
       let ffmpegCommand = ffmpeg()
         .input(concatFilePath)
         .inputOptions(['-f concat', '-safe 0'])
-        .output(OUTPUT_VIDEO_PATH)
+        .output(path.join(__dirname, '../output/video/final.mp4'))
         .on('end', () => {
-          console.log(`✅ Final video created: ${OUTPUT_VIDEO_PATH}`);
-          resolve(OUTPUT_VIDEO_PATH);
+          console.log(`✅ Final video created: ${path.join(__dirname, '../output/video/final.mp4')}`);
+          resolve(path.join(__dirname, '../output/video/final.mp4'));
         })
         .on('error', err => reject(`❌ FFmpeg error: ${err.message}`));
 

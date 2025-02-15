@@ -26,23 +26,28 @@ function clearOutputFolders() {
 clearOutputFolders();
 
 async function main() {
+  const outputDir = path.join(__dirname, '../output');
+  
+  // Randomly select an env folder
+  const envFolders = ['env1', 'env2', 'env3', 'env4'];
+  const selectedEnv = envFolders[Math.floor(Math.random() * envFolders.length)];
+  const envFolder = path.join(__dirname, `../public/JP/${selectedEnv}`);
+  
   try {
-    const text = `well so, I'm not really sure about this Noah solomon fellow... I mean you never know man...
-    he could just fuckin rug pull our dumb asses again like he did with the pillzoomie projec, and you know...
-    it's like that's not ideal in the slightest, but whatever man we'll see what happens `; // your text
+    const text = ``; // your text
     const voiceId = 'K1zEUenwO6XnzLVQdgEp';
 
     // Generate the voice (audio)
     const audioFilePath = await voiceGeneration(text, voiceId);
     console.log(`Audio file saved at: ${audioFilePath}`);
     
-    // Generate the video based on the audio
-    const videoFilePath = await videoGeneration(audioFilePath);
+    // Pass the envFolder to videoGeneration
+    const videoFilePath = await videoGeneration(audioFilePath, envFolder);
     console.log(`🎬 Video generated: ${videoFilePath}`);
 
     // Submit sync job only once here
-    const jobId = await submitSyncJob();
-    const finalVideoPath = await pollJobStatus(jobId);
+    const jobId = await submitSyncJob(outputDir);
+    const finalVideoPath = await pollJobStatus(jobId, outputDir);
     console.log(`🎬 Final synced video saved at: ${finalVideoPath}`);
 
   } catch (error) {

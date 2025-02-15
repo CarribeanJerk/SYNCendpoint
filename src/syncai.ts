@@ -2,6 +2,7 @@ import fs from 'fs';
 import fetch from 'node-fetch'; // Importing fetch for Node.js
 import dotenv from 'dotenv';
 import AWS from 'aws-sdk';
+import path from 'path';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -64,7 +65,11 @@ async function uploadToS3(filePath: string, key: string): Promise<string> {
 /**
  * Submits a job to the Sync API for lip-syncing.
  */
-export async function submitSyncJob() {
+export async function submitSyncJob(outputDir: string) {
+  const VIDEO_PATH = path.join(outputDir, 'video/final.mp4');
+  const AUDIO_PATH = path.join(outputDir, 'audio/output.mp3');
+  const OUTPUT_DIR = path.join(outputDir, 'final');
+
   // Check if video and audio files exist before uploading
   if (!fs.existsSync(VIDEO_PATH)) {
     console.error(`❌ Video file not found: ${VIDEO_PATH}`);
@@ -139,79 +144,64 @@ export async function submitSyncJob() {
 /**
  * Polls the Sync API for job status until completion.
  */
-export async function pollJobStatus(jobId: string) {
-    const JOB_STATUS_URL = `https://api.sync.so/v2/generate/${jobId}`;
+export async function pollJobStatus(jobId: string, outputDir: string) {
+  const OUTPUT_DIR = path.join(outputDir, 'final');
+  const JOB_STATUS_URL = `https://api.sync.so/v2/generate/${jobId}`;
 
-    let retries = 300;  // Increased from 10 to 60 (5 minutes total)
-    while (retries > 0) {
-        try {
-            const response = await fetch(JOB_STATUS_URL, {
-                method: 'GET',
-                headers: { 'x-api-key': API_KEY! },
-            });
+  let retries = 300;  // Increased from 10 to 60 (5 minutes total)
+  while (retries > 0) {
+    try {
+      const response = await fetch(JOB_STATUS_URL, {
+        method: 'GET',
+        headers: { 'x-api-key': API_KEY! },
+      });
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error(`Error response:`, errorText);
-                throw new Error(`Failed to get job status: ${response.status}`);
-            }
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Error response:`, errorText);
+        throw new Error(`Failed to get job status: ${response.status}`);
+      }
 
-            const data = await response.json() as {
-                status: string;
-                outputUrl?: string;
-                error?: string;
-            };
+      const data = await response.json() as {
+        status: string;
+        outputUrl?: string;
+        error?: string;
+      };
 
-            if (data.status === 'PROCESSING') {
-                console.log(`🔄 Job status: ${data.status} (${retries} retries left)`);
-            } else {
-                console.log(`🔄 Job status: ${data.status}`);
-            }
+      if (data.status === 'PROCESSING') {
+        console.log(`🔄 Job status: ${data.status} (${retries} retries left)`);
+      } else {
+        console.log(`🔄 Job status: ${data.status}`);
+      }
 
-            if (data.error) {
-                throw new Error(`Job failed: ${data.error}`);
-            }
+      if (data.error) {
+        throw new Error(`Job failed: ${data.error}`);
+      }
 
-            if (data.status === 'COMPLETED' && data.outputUrl) {
-                console.log(`✅ Lip-synced video ready: ${data.outputUrl}`);
-                const outputFilePath = `${OUTPUT_DIR}/final_video.mp4`;
+      if (data.status === 'COMPLETED' && data.outputUrl) {
+        console.log(`✅ Lip-synced video ready: ${data.outputUrl}`);
+        const outputFilePath = path.join(OUTPUT_DIR, 'final_video.mp4');
 
-                // Download the final video
-                const file = await fetch(data.outputUrl);
-                const fileStream = fs.createWriteStream(outputFilePath);
+        // Download the final video
+        const file = await fetch(data.outputUrl);
+        const fileStream = fs.createWriteStream(outputFilePath);
 
-                if (!file.body) {
-                  throw new Error('❌ Failed to download video: Response body is null');
-                }
-                file.body.pipe(fileStream);
-                return new Promise((resolve, reject) => {
-                  fileStream.on('finish', () => resolve(outputFilePath));
-                  fileStream.on('error', reject);
-                });
-            }
-        } catch (error) {
-            console.error('❌ Error checking job status:', error);
+        if (!file.body) {
+          throw new Error('❌ Failed to download video: Response body is null');
         }
-
-        retries--;
-        await new Promise((resolve) => setTimeout(resolve, 10000));  // Still checking every 5 seconds
+        file.body.pipe(fileStream);
+        return new Promise((resolve, reject) => {
+          fileStream.on('finish', () => resolve(outputFilePath));
+          fileStream.on('error', reject);
+        });
+      }
+    } catch (error) {
+      console.error('❌ Error checking job status:', error);
     }
 
-    throw new Error('❌ Sync job did not complete within 5 minutes. You can check the status manually at https://sync.so/dashboard');
-}
-
-/**
- * Main function to handle the sync process.
- */
-async function processSync() {
-  try {
-    const jobId = await submitSyncJob();
-    const outputFilePath = await pollJobStatus(jobId);
-    console.log(`🎬 Final synced video saved to: ${outputFilePath}`);
-  } catch (error) {
-    console.error('❌ Sync process failed:', error);
+    retries--;
+    await new Promise((resolve) => setTimeout(resolve, 10000));  // Still checking every 5 seconds
   }
-}
 
-// Run the process
-processSync();
+  throw new Error('❌ Sync job did not complete within 5 minutes. You can check the status manually at https://sync.so/dashboard');
+}
