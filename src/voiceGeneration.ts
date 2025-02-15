@@ -17,7 +17,7 @@ export async function voiceGeneration(text: string, voiceId: string): Promise<st
         text,
         model_id: 'eleven_multilingual_v2',
         voice_settings: {
-          stability: 0.6,
+          stability: 0.65,
           similarity_boost: 0.85,
           style: .15
         },
