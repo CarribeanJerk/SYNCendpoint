@@ -34,7 +34,9 @@ async function main() {
   const envFolder = path.join(__dirname, `../public/JP/${selectedEnv}`);
   
   try {
-    const text = ``; // your text
+    const text = `This nigga boneGPT told me to buy bonecoin, so I bought that shit at like 700 thousand right...
+    and that shit went fucking berserk man like god damn... I was able to use the bonecoin profits to pay for my
+    my wife's boyfriend's apartment, it's like what the hell else can you ask for man? I mean Jesus, buy bonecoin, bitches.`; // your text
     const voiceId = 'K1zEUenwO6XnzLVQdgEp';
 
     // Generate the voice (audio)

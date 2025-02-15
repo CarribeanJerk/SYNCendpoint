@@ -20,10 +20,6 @@ const s3 = new AWS.S3({
   region: 'us-east-1',  // Replace with your bucket's region if needed
 });
 
-// Path to your local video and audio files
-const VIDEO_PATH = 'output/video/final.mp4';  // Modify this path if needed
-const AUDIO_PATH = 'output/audio/output.mp3';  // Modify this path if needed
-
 // S3 configuration
 const BUCKET_NAME = 'syncbucketai'; // Replace with your bucket name
 
@@ -68,7 +64,6 @@ async function uploadToS3(filePath: string, key: string): Promise<string> {
 export async function submitSyncJob(outputDir: string) {
   const VIDEO_PATH = path.join(outputDir, 'video/final.mp4');
   const AUDIO_PATH = path.join(outputDir, 'audio/output.mp3');
-  const OUTPUT_DIR = path.join(outputDir, 'final');
 
   // Check if video and audio files exist before uploading
   if (!fs.existsSync(VIDEO_PATH)) {
@@ -93,7 +88,7 @@ export async function submitSyncJob(outputDir: string) {
     console.log(`🛠️ Submitting sync job to Sync API...`);
     
     const requestBody = {
-        model: 'lipsync-1.8.0',
+        model: 'lipsync-1.9.0-beta',
         input: [
             {
                 type: 'video',

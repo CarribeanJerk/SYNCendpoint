@@ -21,6 +21,7 @@
     "node-fetch": "^3.3.2"
   },
   "scripts": {
-    "start": "bun run src/index.ts"
+    "start": "bun run src/index.ts",
+    "clear": "bun run src/clearOutput.ts"
   }
 }
