@@ -3,6 +3,7 @@ import { videoGeneration } from './videoGeneration';
 import { submitSyncJob, pollJobStatus } from './syncai';  // Importing Sync API functions
 import fs from 'fs';
 import path from 'path';
+import { uploadToS3 } from './s3';  // Re-add this import
 
 // Function to clear specified output folders
 function clearOutputFolders() {
@@ -49,7 +50,11 @@ export async function generateVideo(text: string) {
     const finalVideoPath = await pollJobStatus(jobId, outputDir);
     console.log(`🎬 Final synced video saved at: ${finalVideoPath}`);
 
-    return finalVideoPath;
+    // Upload to S3 and get URL
+    const s3Key = `videos/${Date.now()}_final.mp4`;
+    const s3Url = await uploadToS3(finalVideoPath, s3Key);
+    
+    return s3Url;  // Return the S3 URL
   } catch (error) {
     console.error('An error occurred:', error);
     throw error;

@@ -1,6 +1,6 @@
 import express from 'express';
 import type { RequestHandler } from 'express';
-import { generateVideo } from './index';  // We'll modify index.ts to export this function
+import { generateVideo } from '../src/index';  // We'll modify index.ts to export this function
 
 const app = express();
 app.use(express.json());

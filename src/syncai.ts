@@ -139,11 +139,11 @@ export async function submitSyncJob(outputDir: string) {
 /**
  * Polls the Sync API for job status until completion.
  */
-export async function pollJobStatus(jobId: string, outputDir: string) {
+export async function pollJobStatus(jobId: string, outputDir: string): Promise<string> {
   const OUTPUT_DIR = path.join(outputDir, 'final');
   const JOB_STATUS_URL = `https://api.sync.so/v2/generate/${jobId}`;
 
-  let retries = 300;  // Increased from 10 to 60 (5 minutes total)
+  let retries = 300;
   while (retries > 0) {
     try {
       const response = await fetch(JOB_STATUS_URL, {
@@ -163,16 +163,6 @@ export async function pollJobStatus(jobId: string, outputDir: string) {
         error?: string;
       };
 
-      if (data.status === 'PROCESSING') {
-        console.log(`🔄 Job status: ${data.status} (${retries} retries left)`);
-      } else {
-        console.log(`🔄 Job status: ${data.status}`);
-      }
-
-      if (data.error) {
-        throw new Error(`Job failed: ${data.error}`);
-      }
-
       if (data.status === 'COMPLETED' && data.outputUrl) {
         console.log(`✅ Lip-synced video ready: ${data.outputUrl}`);
         const outputFilePath = path.join(OUTPUT_DIR, 'final_video.mp4');
@@ -185,7 +175,7 @@ export async function pollJobStatus(jobId: string, outputDir: string) {
           throw new Error('❌ Failed to download video: Response body is null');
         }
         file.body.pipe(fileStream);
-        return new Promise((resolve, reject) => {
+        return new Promise<string>((resolve, reject) => {
           fileStream.on('finish', () => resolve(outputFilePath));
           fileStream.on('error', reject);
         });
@@ -195,8 +185,8 @@ export async function pollJobStatus(jobId: string, outputDir: string) {
     }
 
     retries--;
-    await new Promise((resolve) => setTimeout(resolve, 10000));  // Still checking every 5 seconds
+    await new Promise((resolve) => setTimeout(resolve, 10000));
   }
 
-  throw new Error('❌ Sync job did not complete within 5 minutes. You can check the status manually at https://sync.so/dashboard');
+  throw new Error('❌ Sync job did not complete within timeout period');
 }
