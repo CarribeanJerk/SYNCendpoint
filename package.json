@@ -6,6 +6,7 @@
     "@types/bun": "latest",
     "@types/express": "^5.0.0",
     "@types/fluent-ffmpeg": "^2.1.27",
+    "@vercel/node": "^3.0.0",
     "tsx": "^4.19.2"
   },
   "peerDependencies": {

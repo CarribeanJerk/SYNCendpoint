@@ -1,15 +1,19 @@
 {
     "version": 2,
-    "functions": {
-      "api/*.ts": {
-        "memory": 3008,
-        "maxDuration": 60
+    "builds": [
+      {
+        "src": "api/index.ts",
+        "use": "@vercel/node",
+        "config": {
+          "buildCommand": "apt-get update && apt-get install -y ffmpeg",
+          "includeFiles": ["src/**/*", "public/**/*"]
+        }
       }
-    },
+    ],
     "routes": [
       {
         "src": "/(.*)",
-        "dest": "/api"
+        "dest": "/api/index.ts"
       }
     ]
-  } 
+} 
